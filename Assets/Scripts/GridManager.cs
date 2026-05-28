@@ -9,6 +9,8 @@ public class GridManager : MonoBehaviour
     public Transform[,] gridCells;
     private Transform[,] occupiedBy;   // guarda qual peça está em cada célula
 
+    public float GridStartX { get; private set; }
+    public float GridStartY { get; private set; }
     void Awake()
     {
         occupiedBy = new Transform[width, height];
@@ -21,11 +23,20 @@ public class GridManager : MonoBehaviour
         GameObject cellsHolder = new GameObject("Cells");
         cellsHolder.transform.parent = transform;
 
+        // Calcula o offset para centralizar a grade no objeto Grid
+        float offsetX = -width / 2f + 0.5f;
+        float offsetY = -height / 2f + 0.5f;
+
+        GridStartX = offsetX;
+        GridStartY = offsetY;
+        
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                GameObject cell = Instantiate(cellPrefab, new Vector3(x, y, 0), Quaternion.identity);
+                // Posição local: célula (x,y) fica em (x + offsetX, y + offsetY)
+                Vector3 cellPos = new Vector3(x + offsetX, y + offsetY, 0);
+                GameObject cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
                 cell.name = $"Cell ({x},{y})";
                 cell.transform.parent = cellsHolder.transform;
 
@@ -38,8 +49,7 @@ public class GridManager : MonoBehaviour
                 gridCells[x, y] = cell.transform;
             }
         }
-
-        //transform.position = new Vector3(-5f, -3.5f, 0);
+        // Não mexemos mais na posição do transform aqui! A posição será a que você definir no Inspector (0,0,0).
     }
 
     // Métodos de ocupação

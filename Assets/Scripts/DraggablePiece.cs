@@ -108,7 +108,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     Vector3 GetSnapPosition()
     {
         Vector3 pivotWorld = transform.TransformPoint(Vector3.zero);
-        Vector3 gridOrigin = gridManager.transform.position;
+        Vector3 gridOrigin = gridManager.transform.position + new Vector3(gridManager.GridStartX, gridManager.GridStartY, 0);
         int col = Mathf.RoundToInt(pivotWorld.x - gridOrigin.x);
         int row = Mathf.RoundToInt(pivotWorld.y - gridOrigin.y);
         return new Vector3(gridOrigin.x + col, gridOrigin.y + row, 0);
@@ -117,8 +117,8 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     bool TryPlace()
     {
         Vector3 snapPos = GetSnapPosition();
-        int gridX = Mathf.RoundToInt(snapPos.x - gridManager.transform.position.x);
-        int gridY = Mathf.RoundToInt(snapPos.y - gridManager.transform.position.y);
+        int gridX = Mathf.RoundToInt(snapPos.x - (gridManager.transform.position.x + gridManager.GridStartX));
+        int gridY = Mathf.RoundToInt(snapPos.y - (gridManager.transform.position.y + gridManager.GridStartY));
 
         foreach (var offset in shapeOffsets)
         {

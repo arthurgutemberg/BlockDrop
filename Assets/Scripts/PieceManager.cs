@@ -31,6 +31,9 @@ public class PieceManager : MonoBehaviour
     private int piecesPlaced = 0;
     private bool gameOver = false;
 
+    [Header("Aparência")]
+    public float pieceScale = 0.8f;   // ajuste o valor como quiser (1.0 = tamanho padrão)
+
     void Start()
     {
         GenerateInitialQueue();
@@ -51,44 +54,64 @@ public class PieceManager : MonoBehaviour
 
     void SpawnCurrentPiece()
     {
+        // 1. Destroi a peça atual (se existir)
         if (currentPieceInstance != null)
             Destroy(currentPieceInstance.gameObject);
 
-        // Destroi o fantasma antigo, se existir
+        // 2. Destroi o fantasma antigo para não acumular
         if (currentGhost != null)
         {
             Destroy(currentGhost);
             currentGhost = null;
         }
 
+        // 3. Cria o objeto da nova peça
         GameObject pieceObj = new GameObject("CurrentPiece");
         pieceObj.transform.position = currentPieceArea.position;
+        pieceObj.transform.localScale = Vector3.one * pieceScale;   // escala visual
+
+        // 4. Adiciona o script DraggablePiece e inicializa
         DraggablePiece dp = pieceObj.AddComponent<DraggablePiece>();
         currentGhost = CreateGhost(currentShape);
         dp.Initialize(currentType, currentShape, currentGhost);
         dp.SetStartPosition(pieceObj.transform.position);
         currentPieceInstance = dp;
 
-        // Verifica se há espaço; se não, tenta usar o hold ou fim de jogo
+        // 5. Verifica se a peça atual tem espaço no grid
         if (!HasAnyValidPlacement(currentShape))
         {
             if (holdType == null)
             {
+                // Hold vazio → guarda a atual e avança a fila
                 StoreCurrentInHold();
                 AdvanceQueue();
                 SpawnCurrentPiece();
             }
             else
             {
-                SwapWithHold();
-                SpawnCurrentPiece();
+                // Hold ocupado → tenta trocar, mas só se a peça do hold couber
+                if (HasAnyValidPlacement(holdShape))
+                {
+                    SwapWithHold();
+                    SpawnCurrentPiece();
+                }
+                else
+                {
+                    // Nenhuma das duas cabe → Game Over
+                    GameOver();
+                    return;
+                }
             }
+
+            // Se após a troca a nova peça ainda não couber, Game Over
             if (currentPieceInstance != null && !HasAnyValidPlacement(currentShape))
             {
                 GameOver();
                 return;
             }
         }
+
+        // 6. Atualiza as pré-visualizações das próximas peças
         UpdatePreviewVisuals();
     }
 
@@ -265,6 +288,7 @@ public class PieceManager : MonoBehaviour
 
     void GameOver()
     {
+        if (gameOver) return;   // evita execuções repetidas
         gameOver = true;
         gameOverPanel.SetActive(true);
         if (currentPieceInstance != null)
