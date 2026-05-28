@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Collections;
 
 public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -17,7 +18,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     void Awake()
     {
         cam = Camera.main;
-        gridManager = FindFirstObjectByType<GridManager>();
+        gridManager = FindAnyObjectByType<GridManager>();
     }
 
     public void Initialize(PieceType type, Vector2Int[] shape, GameObject ghost)
@@ -36,9 +37,13 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             Destroy(block.GetComponent<BoxCollider2D>());
             blocks.Add(block.transform);
         }
+        Physics2D.SyncTransforms();
 
         // Adiciona um BoxCollider2D que cubra todos os blocos
+        // Adiciona um BoxCollider2D que cubra todos os blocos
         BoxCollider2D col = gameObject.AddComponent<BoxCollider2D>();
+        // Aguarda um frame para garantir que as posições dos sprites estejam atualizadas
+        StartCoroutine(UpdateColliderNextFrame(col));
         Bounds bounds = new Bounds(transform.position, Vector3.zero);
         foreach (var block in blocks)
             bounds.Encapsulate(block.position);
@@ -84,7 +89,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         if (TryPlace())
         {
             ghostPrefab?.SetActive(false);
-            // FindFirstObjectByType<PieceManager>()?.OnPiecePlaced();  // será descomentado na Fase 4
+            FindAnyObjectByType<PieceManager>()?.OnPiecePlaced();  // será descomentado na Fase 4
         }
         else
         {
@@ -142,5 +147,24 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public void SetStartPosition(Vector3 pos)
     {
         startPosition = pos;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        Debug.Log("Clique na peça!");
+    }
+
+    System.Collections.IEnumerator UpdateColliderNextFrame(BoxCollider2D col)
+    {
+        yield return null; // espera um frame para os Sprites estarem posicionados
+        Bounds bounds = new Bounds(transform.position, Vector3.zero);
+        foreach (Transform block in blocks)
+        {
+            SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
+            if (sr != null)
+                bounds.Encapsulate(sr.bounds);
+        }
+        col.size = bounds.size;
+        col.offset = bounds.center - transform.position;
     }
 }

@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
     public Transform[,] gridCells;
     private Transform[,] occupiedBy;   // guarda qual peça está em cada célula
 
-    void Start()
+    void Awake()
     {
         occupiedBy = new Transform[width, height];
         gridCells = new Transform[width, height];
@@ -39,7 +39,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        transform.position = new Vector3(-5f, -3.5f, 0);
+        //transform.position = new Vector3(-5f, -3.5f, 0);
     }
 
     // Métodos de ocupação
