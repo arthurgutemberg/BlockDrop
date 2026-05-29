@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class PieceManager : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class PieceManager : MonoBehaviour
     public Transform nextPiecePreviewPos;
     public Transform promisePreviewPos;
     public Transform holdPiecePos;
+
+    public TMP_Text highScoreText; // arraste aqui o texto "High Score" da UI na cena Main
+    private int highScore;
 
     [Header("Escalas")]
     public float currentPieceScale = 0.8f;
@@ -48,6 +52,14 @@ public class PieceManager : MonoBehaviour
         SpawnCurrentPiece();
         UpdateUI();
         gameOverPanel.SetActive(false);
+        highScore = PlayerPrefs.GetInt("HighScore", 0);
+        UpdateHighScoreUI();
+    }
+
+    void UpdateHighScoreUI()
+    {
+        if (highScoreText != null)
+            highScoreText.text = "High Score: " + highScore;
     }
 
     void GenerateInitialQueue()
@@ -296,7 +308,8 @@ public class PieceManager : MonoBehaviour
 
     void GameOver()
     {
-        if (gameOver) return;   // evita execuções repetidas
+        if (gameOver) return;
+        UpdateUI(); // garante que o último score seja verificado
         gameOver = true;
         gameOverPanel.SetActive(true);
         if (currentPieceInstance != null)
@@ -309,10 +322,24 @@ public class PieceManager : MonoBehaviour
     {
         scoreText.text = "Score: " + score;
         piecesPlacedText.text = "Peças: " + piecesPlaced;
+
+        // Atualiza high score se necessário
+        if (score > highScore)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt("HighScore", highScore);
+            PlayerPrefs.Save();
+            UpdateHighScoreUI();
+        }
     }
 
     public void RestartGame()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    public void GoToMenu()
+    {
+        SceneManager.LoadScene(0); // título
     }
 }
