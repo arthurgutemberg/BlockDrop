@@ -8,13 +8,14 @@ public class GridManager : MonoBehaviour
     public GameObject blockPrefab;
     public Transform[,] gridCells;
     private Transform[,] occupiedBy;   // guarda qual peça está em cada célula
-
+    private GameObject[,] occupiedBlock; // guarda o GameObject do bloco em cada célula
     public float GridStartX { get; private set; }
     public float GridStartY { get; private set; }
     void Awake()
     {
         occupiedBy = new Transform[width, height];
         gridCells = new Transform[width, height];
+        occupiedBlock = new GameObject[width, height];
         DrawGrid();
     }
 
@@ -58,36 +59,25 @@ public class GridManager : MonoBehaviour
         return occupiedBy[x, y] != null;
     }
 
-    public void SetCellOccupied(int x, int y, Transform piece)
+    public void SetCellOccupied(int x, int y, Transform piece, GameObject block)
     {
         occupiedBy[x, y] = piece;
+        occupiedBlock[x, y] = block;
     }
 
     public void ClearCell(int x, int y)
     {
         occupiedBy[x, y] = null;
+        occupiedBlock[x, y] = null;
     }
-
     // Limpa visualmente os blocos de uma linha e libera as células
     public void ClearLine(int row)
     {
         for (int x = 0; x < width; x++)
         {
-            if (occupiedBy[x, row] != null)
+            if (occupiedBlock[x, row] != null)
             {
-                Transform pieceParent = occupiedBy[x, row];
-                // Procura o bloco filho exatamente nesta posição e o destrói
-                foreach (Transform block in pieceParent)
-                {
-                    Vector3 worldPos = block.position;
-                    int bx = Mathf.RoundToInt(worldPos.x - transform.position.x);
-                    int by = Mathf.RoundToInt(worldPos.y - transform.position.y);
-                    if (bx == x && by == row)
-                    {
-                        Destroy(block.gameObject);
-                        break;
-                    }
-                }
+                Destroy(occupiedBlock[x, row]);
                 ClearCell(x, row);
             }
         }
@@ -116,4 +106,13 @@ public class GridManager : MonoBehaviour
         }
         return cleared;
     }
+    private Vector2Int WorldToGrid(Vector3 worldPos)
+    {
+        float gridStartX = transform.position.x + GridStartX;
+        float gridStartY = transform.position.y + GridStartY;
+        int x = Mathf.RoundToInt(worldPos.x - gridStartX);
+        int y = Mathf.RoundToInt(worldPos.y - gridStartY);
+        return new Vector2Int(x, y);
+    }
 }
+

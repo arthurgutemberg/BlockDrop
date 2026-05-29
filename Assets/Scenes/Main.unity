@@ -1010,10 +1010,15 @@ MonoBehaviour:
   nextPiecePreviewPos: {fileID: 1886064441}
   promisePreviewPos: {fileID: 1119951584}
   holdPiecePos: {fileID: 18936696}
+  currentPieceScale: 0.9
+  previewScale: 0.5
+  holdScale: 0.5
+  ghostScale: 0.9
+  fixedPieceScale: 1
   scoreText: {fileID: 1356290287}
   piecesPlacedText: {fileID: 771480811}
   gameOverPanel: {fileID: 1762822251}
-  pieceScale: 0.8
+  pieceScale: 1
 --- !u!4 &928711822
 Transform:
   m_ObjectHideFlags: 0
@@ -1296,8 +1301,8 @@ Canvas:
   m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: 2025487383
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!1 &1304095723
 GameObject:

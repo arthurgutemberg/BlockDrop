@@ -12,6 +12,14 @@ public class PieceManager : MonoBehaviour
     public Transform promisePreviewPos;
     public Transform holdPiecePos;
 
+    [Header("Escalas")]
+    public float currentPieceScale = 0.8f;
+    public float previewScale = 0.5f;
+    public float holdScale = 0.5f;
+    public float ghostScale = 0.8f;
+    // opcional: escala das peças já colocadas (se quiser manter 1.0, tudo bem)
+    public float fixedPieceScale = 1.0f;
+
     [Header("UI")]
     public TMP_Text scoreText;
     public TMP_Text piecesPlacedText;
@@ -67,13 +75,12 @@ public class PieceManager : MonoBehaviour
 
         // 3. Cria o objeto da nova peça
         GameObject pieceObj = new GameObject("CurrentPiece");
-        pieceObj.transform.position = currentPieceArea.position;
-        pieceObj.transform.localScale = Vector3.one * pieceScale;   // escala visual
+        pieceObj.transform.position = currentPieceArea.position;  // escala visual
 
         // 4. Adiciona o script DraggablePiece e inicializa
         DraggablePiece dp = pieceObj.AddComponent<DraggablePiece>();
         currentGhost = CreateGhost(currentShape);
-        dp.Initialize(currentType, currentShape, currentGhost);
+        dp.Initialize(currentType, currentShape, currentGhost, currentPieceScale);
         dp.SetStartPosition(pieceObj.transform.position);
         currentPieceInstance = dp;
 
@@ -157,6 +164,7 @@ public class PieceManager : MonoBehaviour
         UpdateUI();
         AdvanceQueue();
         SpawnCurrentPiece();
+        
     }
 
     void AdvanceQueue()
@@ -189,7 +197,7 @@ public class PieceManager : MonoBehaviour
         GameObject container = new GameObject("PreviewPiece");
         container.transform.SetParent(parent, false);
         container.transform.localPosition = Vector3.zero;
-        container.transform.localScale = Vector3.one * 0.5f; // reduz 50%
+        container.transform.localScale = Vector3.one * previewScale;
 
         foreach (var offset in shape)
         {
@@ -203,11 +211,11 @@ public class PieceManager : MonoBehaviour
     GameObject CreateGhost(Vector2Int[] shape)
     {
         GameObject ghost = new GameObject("Ghost");
-        ghost.transform.localScale = Vector3.one;
         foreach (var offset in shape)
         {
             GameObject block = Instantiate(blockPrefab, ghost.transform);
             block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
+            block.transform.localScale = Vector3.one * ghostScale;
             SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
             sr.color = new Color(1, 1, 1, 0.3f);
             Destroy(block.GetComponent<BoxCollider2D>());
@@ -275,7 +283,7 @@ public class PieceManager : MonoBehaviour
             GameObject container = new GameObject("HoldPiece");
             container.transform.SetParent(holdPiecePos, false);
             container.transform.localPosition = Vector3.zero;
-            container.transform.localScale = Vector3.one * 0.5f; // reduz 50%
+            container.transform.localScale = Vector3.one * holdScale; // reduz 50%
 
             foreach (var offset in holdShape)
             {

@@ -21,8 +21,9 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         gridManager = FindAnyObjectByType<GridManager>();
     }
 
-    public void Initialize(PieceType type, Vector2Int[] shape, GameObject ghost)
+    public void Initialize(PieceType type, Vector2Int[] shape, GameObject ghost, float scale)
     {
+        blocks.Clear();
         pieceType = type;
         shapeOffsets = shape;
         ghostPrefab = ghost;
@@ -33,6 +34,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         {
             GameObject block = Instantiate(gridManager.blockPrefab, transform);
             block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
+            block.transform.localScale = Vector3.one * scale;   // 🔹 escala do bloco
             block.GetComponent<SpriteRenderer>().color = GetColor(type);
             Destroy(block.GetComponent<BoxCollider2D>());
             blocks.Add(block.transform);
@@ -98,6 +100,8 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         }
     }
 
+
+
     void UpdateGhostPosition()
     {
         if (ghostPrefab == null) return;
@@ -120,27 +124,36 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         int gridX = Mathf.RoundToInt(snapPos.x - (gridManager.transform.position.x + gridManager.GridStartX));
         int gridY = Mathf.RoundToInt(snapPos.y - (gridManager.transform.position.y + gridManager.GridStartY));
 
-        foreach (var offset in shapeOffsets)
+        // 1. Verificar se todos os blocos cabem (dentro do grid e célula vazia)
+        for (int i = 0; i < shapeOffsets.Length; i++)
         {
+            Vector2Int offset = shapeOffsets[i];
             int x = gridX + offset.x;
             int y = gridY + offset.y;
+
             if (x < 0 || x >= gridManager.width || y < 0 || y >= gridManager.height)
                 return false;
+
             if (gridManager.IsCellOccupied(x, y))
                 return false;
         }
 
+        // 2. Posicionar a peça e marcá-la como colocada
         transform.position = snapPos;
         isPlaced = true;
 
-        foreach (var offset in shapeOffsets)
+        // 3. Registrar ocupação no GridManager (agora com o GameObject do bloco)
+        for (int i = 0; i < shapeOffsets.Length; i++)
         {
+            Vector2Int offset = shapeOffsets[i];
             int x = gridX + offset.x;
             int y = gridY + offset.y;
-            gridManager.SetCellOccupied(x, y, transform);
+            gridManager.SetCellOccupied(x, y, transform, blocks[i].gameObject);
         }
 
+        // 4. Remover o colisor para não interferir em cliques futuros
         Destroy(GetComponent<BoxCollider2D>());
+
         return true;
     }
 
