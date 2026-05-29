@@ -46,11 +46,6 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         BoxCollider2D col = gameObject.AddComponent<BoxCollider2D>();
         // Aguarda um frame para garantir que as posições dos sprites estejam atualizadas
         StartCoroutine(UpdateColliderNextFrame(col));
-        Bounds bounds = new Bounds(transform.position, Vector3.zero);
-        foreach (var block in blocks)
-            bounds.Encapsulate(block.position);
-        col.size = bounds.size;
-        col.offset = bounds.center - transform.position;
     }
 
     Color GetColor(PieceType type)

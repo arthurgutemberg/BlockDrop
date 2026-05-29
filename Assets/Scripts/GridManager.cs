@@ -28,6 +28,9 @@ public class GridManager : MonoBehaviour
 
         float offsetX = -width / 2f + 0.5f;
         float offsetY = -height / 2f + 0.5f;
+        
+        GridStartX = offsetX;
+        GridStartY = offsetY;
 
         for (int x = 0; x < width; x++)
         {
