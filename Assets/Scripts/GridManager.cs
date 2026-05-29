@@ -21,25 +21,23 @@ public class GridManager : MonoBehaviour
 
     void DrawGrid()
     {
+        // Cria um objeto para organizar as células como filho do Grid
         GameObject cellsHolder = new GameObject("Cells");
         cellsHolder.transform.parent = transform;
+        cellsHolder.transform.localPosition = Vector3.zero; // posição local zero em relação ao Grid
 
-        // Calcula o offset para centralizar a grade no objeto Grid
         float offsetX = -width / 2f + 0.5f;
         float offsetY = -height / 2f + 0.5f;
 
-        GridStartX = offsetX;
-        GridStartY = offsetY;
-        
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                // Posição local: célula (x,y) fica em (x + offsetX, y + offsetY)
-                Vector3 cellPos = new Vector3(x + offsetX, y + offsetY, 0);
-                GameObject cell = Instantiate(cellPrefab, cellPos, Quaternion.identity);
+                // Instancia a célula como filha do cellsHolder
+                GameObject cell = Instantiate(cellPrefab, cellsHolder.transform);
+                // Define a posição local em relação ao cellsHolder
+                cell.transform.localPosition = new Vector3(x + offsetX, y + offsetY, 0);
                 cell.name = $"Cell ({x},{y})";
-                cell.transform.parent = cellsHolder.transform;
 
                 SpriteRenderer sr = cell.GetComponent<SpriteRenderer>();
                 if ((x + y) % 2 == 0)
@@ -50,7 +48,7 @@ public class GridManager : MonoBehaviour
                 gridCells[x, y] = cell.transform;
             }
         }
-        // Não mexemos mais na posição do transform aqui! A posição será a que você definir no Inspector (0,0,0).
+        // Não precisa definir transform.position = ... – a posição do Grid é controlada manualmente
     }
 
     // Métodos de ocupação
