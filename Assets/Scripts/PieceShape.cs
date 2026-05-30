@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum PieceType
 {
-    I, O, T, L, J, S, Z
+    I, O, T, L, J, S, Z, Dot, Domino, Trio
 }
 
 public static class PieceShape
@@ -42,6 +42,18 @@ public static class PieceShape
         { PieceType.Z, new List<Vector2Int[]> {
             new Vector2Int[] { new(0,0), new(1,0), new(0,1), new(-1,1) },
             new Vector2Int[] { new(0,0), new(0,1), new(1,1), new(1,2) }
+        }},
+        // Novas peças
+        { PieceType.Dot, new List<Vector2Int[]> {
+            new Vector2Int[] { new(0,0) }
+        }},
+        { PieceType.Domino, new List<Vector2Int[]> {
+            new Vector2Int[] { new(0,0), new(1,0) },
+            new Vector2Int[] { new(0,0), new(0,1) }
+        }},
+        { PieceType.Trio, new List<Vector2Int[]> {
+            new Vector2Int[] { new(0,0), new(1,0), new(2,0) },
+            new Vector2Int[] { new(0,0), new(0,1), new(0,2) }
         }}
     };
 
@@ -50,5 +62,13 @@ public static class PieceShape
         var variants = Shapes[type];
         return variants[Random.Range(0, variants.Count)];
     }
-}
 
+    // 🔹 Novo método: escolhe um tipo de peça aleatório com base no modo
+    public static PieceType GetRandomPieceType(bool arcadeMode)
+    {
+        if (arcadeMode)
+            return (PieceType)Random.Range(0, 10); // 0 a 9 (10 peças: I..Z + Dot, Domino, Trio)
+        else
+            return (PieceType)Random.Range(0, 7);  // apenas as 7 clássicas
+    }
+}

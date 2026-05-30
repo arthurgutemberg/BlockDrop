@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class PieceManager : MonoBehaviour
 {
+    [Header("Seleção de Modo")]
+    public bool arcadeMode = false;
+
     [Header("Referências da Cena")]
     public GridManager gridManager;
     public GameObject blockPrefab;
@@ -76,7 +79,7 @@ public class PieceManager : MonoBehaviour
         promiseShape = PieceShape.GetRandomShape(promiseType);
         nextType = (PieceType)Random.Range(0, 7);
         nextShape = PieceShape.GetRandomShape(nextType);
-        currentType = (PieceType)Random.Range(0, 7);
+        currentType = PieceShape.GetRandomPieceType(arcadeMode);
         currentShape = PieceShape.GetRandomShape(currentType);
     }
 

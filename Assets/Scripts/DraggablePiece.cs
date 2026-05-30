@@ -54,11 +54,14 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         {
             PieceType.I => Color.cyan,
             PieceType.O => Color.yellow,
-            PieceType.T => new Color(0.6f, 0.2f, 0.8f),
+            PieceType.T => new Color(0.6f, 0.2f, 0.8f), // Roxo
             PieceType.L => Color.blue,
-            PieceType.J => new Color(1f, 0.5f, 0f),
+            PieceType.J => new Color(1f, 0.5f, 0f), // Laranja
             PieceType.S => Color.green,
             PieceType.Z => Color.red,
+            PieceType.Dot    => new Color(1f, 0.08f, 0.58f), // Rosa Choque / Deep Pink
+            PieceType.Domino => new Color(0.85f, 0.65f, 0.13f), // Dourado / Goldenrod
+            PieceType.Trio   => new Color(0f, 1f, 0.5f), // Verde Menta / Spring Green
             _ => Color.white
         };
     }
