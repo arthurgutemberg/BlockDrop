@@ -1,0 +1,10 @@
+INCOMING
+
+Quero adicionar um contato de combo. Parecido com o contador de combo do guitar hero. o valor do combo vai multiplicar os pontos ganhos, e vai de x1 até x4 sendo x1 o combo inicial e o jogador evolui até o x4. O combo volta para o x1 após o jogador inserir 3 linhas (vamos criar um visual disso,  sem fazer uma Seguindo a tabela abaixo (ou me recomende algo melhor).
+
+1x - ponto inicial
+2x - após o jogador limpar 2 linhas
+3x - apos o jogador limpar mais 2 linhas
+4x - apos o jogador limpar mais 2 linhas
+
+Se o jogador limpar 3 linhas ao mesmo tempo no x1, ele ganha o ponto do x1 mas vai direto para o x2
