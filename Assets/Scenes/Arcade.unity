@@ -1018,6 +1018,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce7d81b6c11a8344caed1a887ac4a0df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceManager
+  arcadeMode: 1
   gridManager: {fileID: 702555122}
   blockPrefab: {fileID: 8516088029055144083, guid: 38b17882885fcb548aa5383966122b39, type: 3}
   currentPieceArea: {fileID: 1304095724}
