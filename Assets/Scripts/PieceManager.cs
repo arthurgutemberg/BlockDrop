@@ -36,6 +36,9 @@ public class PieceManager : MonoBehaviour
     public TMP_Text piecesPlacedText;
     public GameObject gameOverPanel;
 
+    [Header("Particles")]
+    public GameObject placeParticlesPrefab;
+
     // Fila de peças
     private PieceType currentType, nextType, promiseType;
     private Vector2Int[] currentShape, nextShape, promiseShape;
@@ -75,9 +78,9 @@ public class PieceManager : MonoBehaviour
 
     void GenerateInitialQueue()
     {
-        promiseType = (PieceType)Random.Range(0, 7);
+        promiseType = PieceShape.GetRandomPieceType(arcadeMode);
         promiseShape = PieceShape.GetRandomShape(promiseType);
-        nextType = (PieceType)Random.Range(0, 7);
+        nextType = PieceShape.GetRandomPieceType(arcadeMode);
         nextShape = PieceShape.GetRandomShape(nextType);
         currentType = PieceShape.GetRandomPieceType(arcadeMode);
         currentShape = PieceShape.GetRandomShape(currentType);
@@ -103,6 +106,7 @@ public class PieceManager : MonoBehaviour
         // 4. Adiciona o script DraggablePiece e inicializa
         DraggablePiece dp = pieceObj.AddComponent<DraggablePiece>();
         currentGhost = CreateGhost(currentShape);
+        dp.placeParticlesPrefab = placeParticlesPrefab;
         dp.Initialize(currentType, currentShape, currentGhost, currentPieceScale);
         dp.SetStartPosition(pieceObj.transform.position);
         currentPieceInstance = dp;
@@ -203,11 +207,12 @@ public class PieceManager : MonoBehaviour
     
     void AdvanceQueue()
     {
+        // Avança a fila: a próxima vira atual, a promessa vira próxima, e gera uma nova promessa
         currentType = nextType;
         currentShape = nextShape;
         nextType = promiseType;
         nextShape = promiseShape;
-        promiseType = (PieceType)Random.Range(0, 7);
+        promiseType = PieceShape.GetRandomPieceType(arcadeMode);
         promiseShape = PieceShape.GetRandomShape(promiseType);
     }
 
@@ -269,6 +274,9 @@ public class PieceManager : MonoBehaviour
             PieceType.J => new Color(1f, 0.5f, 0f),
             PieceType.S => Color.green,
             PieceType.Z => Color.red,
+            PieceType.Dot    => new Color(1f, 0.08f, 0.58f), // Rosa choque
+            PieceType.Domino => new Color(0.85f, 0.65f, 0.13f), // Dourado
+            PieceType.Trio   => new Color(0f, 1f, 0.5f), // Verde menta
             _ => Color.white
         };
     }
@@ -359,7 +367,7 @@ public class PieceManager : MonoBehaviour
 
     public void RestartGame()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
     }
 
     public void GoToMenu()

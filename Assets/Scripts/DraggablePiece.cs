@@ -14,6 +14,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     private GameObject ghostPrefab;
     private Vector3 startPosition;
     private Camera cam;
+    [HideInInspector] public GameObject placeParticlesPrefab; // será definido pelo PieceManager
 
     void Awake()
     {
@@ -147,6 +148,17 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             int x = gridX + offset.x;
             int y = gridY + offset.y;
             gridManager.SetCellOccupied(x, y, transform, blocks[i].gameObject);
+        }
+
+        if (placeParticlesPrefab != null)
+        {
+            foreach (Transform block in blocks)
+            {
+                if (Random.value < 0.5f)   // 50% de chance em cada bloco
+                {
+                    Instantiate(placeParticlesPrefab, block.position, Quaternion.identity);
+                }
+            }
         }
 
         // 4. Remover o colisor para não interferir em cliques futuros

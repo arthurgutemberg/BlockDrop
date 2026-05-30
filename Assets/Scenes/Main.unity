@@ -1035,6 +1035,7 @@ MonoBehaviour:
   scoreText: {fileID: 1356290287}
   piecesPlacedText: {fileID: 771480811}
   gameOverPanel: {fileID: 1762822251}
+  placeParticlesPrefab: {fileID: 548435780427867328, guid: f5103f8f17a420a4399f83543ff82b45, type: 3}
   pieceScale: 1
 --- !u!4 &928711822
 Transform:
