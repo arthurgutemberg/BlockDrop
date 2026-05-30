@@ -73,23 +73,12 @@ public class GridManager : MonoBehaviour
         occupiedBy[x, y] = null;
         occupiedBlock[x, y] = null;
     }
-    // Limpa visualmente os blocos de uma linha e libera as células
-    public void ClearLine(int row)
+    public int CheckAndClearFullLinesAndColumns()
     {
-        for (int x = 0; x < width; x++)
-        {
-            if (occupiedBlock[x, row] != null)
-            {
-                StartCoroutine(FadeAndDestroy(occupiedBlock[x, row], 0.3f));
-            ClearCell(x, row);
-            }
-        }
-    }
+        List<int> rowsToClear = new List<int>();
+        List<int> colsToClear = new List<int>();
 
-    // Verifica todas as linhas, limpa as completas e retorna quantas foram removidas
-    public int CheckAndClearLines()
-    {
-        int cleared = 0;
+        // Identifica linhas completas
         for (int y = height - 1; y >= 0; y--)
         {
             bool full = true;
@@ -101,26 +90,10 @@ public class GridManager : MonoBehaviour
                     break;
                 }
             }
-            if (full)
-            {
-                ClearLine(y);
-                cleared++;
-            }
+            if (full) rowsToClear.Add(y);
         }
-        return cleared;
-    }
-    private Vector2Int WorldToGrid(Vector3 worldPos)
-    {
-        float gridStartX = transform.position.x + GridStartX;
-        float gridStartY = transform.position.y + GridStartY;
-        int x = Mathf.RoundToInt(worldPos.x - gridStartX);
-        int y = Mathf.RoundToInt(worldPos.y - gridStartY);
-        return new Vector2Int(x, y);
-    }
 
-    public int CheckAndClearColumns()
-    {
-        int cleared = 0;
+        // Identifica colunas completas
         for (int x = 0; x < width; x++)
         {
             bool full = true;
@@ -132,47 +105,74 @@ public class GridManager : MonoBehaviour
                     break;
                 }
             }
-            if (full)
+            if (full) colsToClear.Add(x);
+        }
+
+        // Conjunto para guardar blocos já em fade (evita dupla destruição)
+        HashSet<GameObject> blocksToFade = new HashSet<GameObject>();
+
+        // Marca células das linhas
+        foreach (int row in rowsToClear)
+        {
+            for (int x = 0; x < width; x++)
             {
-                ClearColumn(x);
-                cleared++;
+                if (occupiedBlock[x, row] != null)
+                    blocksToFade.Add(occupiedBlock[x, row]);
             }
         }
-        return cleared;
-    }
 
-    private void ClearColumn(int col)
+        // Marca células das colunas (sem duplicar)
+        foreach (int col in colsToClear)
         {
             for (int y = 0; y < height; y++)
             {
                 if (occupiedBlock[col, y] != null)
-                {
-                    StartCoroutine(FadeAndDestroy(occupiedBlock[col, y], 0.3f)); // mesmo fade das linhas
-                    ClearCell(col, y);
-                }
+                    blocksToFade.Add(occupiedBlock[col, y]);
             }
         }
-        IEnumerator FadeAndDestroy(GameObject block, float duration)
+
+        // Inicia o fade para cada bloco único
+        foreach (GameObject block in blocksToFade)
         {
-            SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
-            if (sr == null)
-            {
-                Destroy(block);
-                yield break;
-            }
-
-            Color startColor = sr.color;
-            Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                sr.color = Color.Lerp(startColor, endColor, elapsed / duration);
-                yield return null;
-            }
-
-            Destroy(block);
+            StartCoroutine(FadeAndDestroy(block, 0.3f));
         }
+
+        // Liberta todas as células marcadas (linhas + colunas)
+        foreach (int row in rowsToClear)
+        {
+            for (int x = 0; x < width; x++)
+                ClearCell(x, row);
+        }
+        foreach (int col in colsToClear)
+        {
+            for (int y = 0; y < height; y++)
+                ClearCell(col, y);
+        }
+
+        return rowsToClear.Count + colsToClear.Count;
+    }
+
+    IEnumerator FadeAndDestroy(GameObject block, float duration)
+    {
+        SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            Destroy(block);
+            yield break;
+        }
+
+        Color startColor = sr.color;
+        Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            sr.color = Color.Lerp(startColor, endColor, elapsed / duration);
+            yield return null;
+        }
+
+        Destroy(block);
+    }
 }
 
