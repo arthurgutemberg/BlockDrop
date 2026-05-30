@@ -191,6 +191,10 @@ public class PieceManager : MonoBehaviour
         UpdateUI();
         AdvanceQueue();
         SpawnCurrentPiece();
+        if (totalCleared > 0)
+        {
+            AudioManager.Instance?.PlayClear();
+        }
         if (placeSound != null && audioSource != null)
         {
             audioSource.PlayOneShot(placeSound);
@@ -273,6 +277,7 @@ public class PieceManager : MonoBehaviour
     public void OnHoldButtonClicked()
     {
         if (gameOver) return;
+        AudioManager.Instance?.PlayHold();
         if (holdType == null)
         {
             StoreCurrentInHold();
@@ -327,6 +332,7 @@ public class PieceManager : MonoBehaviour
     void GameOver()
     {
         if (gameOver) return;
+        AudioManager.Instance?.PlayGameOver();
         UpdateUI(); // garante que o último score seja verificado
         gameOver = true;
         gameOverPanel.SetActive(true);
