@@ -24,6 +24,10 @@ public class PieceManager : MonoBehaviour
     // opcional: escala das peças já colocadas (se quiser manter 1.0, tudo bem)
     public float fixedPieceScale = 1.0f;
 
+    [Header("Áudio")]
+    public AudioClip placeSound;
+    private AudioSource audioSource;
+
     [Header("UI")]
     public TMP_Text scoreText;
     public TMP_Text piecesPlacedText;
@@ -54,6 +58,10 @@ public class PieceManager : MonoBehaviour
         gameOverPanel.SetActive(false);
         highScore = PlayerPrefs.GetInt("HighScore", 0);
         UpdateHighScoreUI();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
     }
 
     void UpdateHighScoreUI()
@@ -165,6 +173,10 @@ public class PieceManager : MonoBehaviour
 
         piecesPlaced++;
         int totalCleared = gridManager.CheckAndClearFullLinesAndColumns();
+        if (totalCleared >= 4)
+        {
+            CameraShake.Instance?.Shake(0.3f, 0.15f); // duração e intensidade ajustáveis
+        }
         score += totalCleared switch
         {
             1 => 100,
@@ -176,9 +188,12 @@ public class PieceManager : MonoBehaviour
         UpdateUI();
         AdvanceQueue();
         SpawnCurrentPiece();
-        
+        if (placeSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(placeSound);
+        }
     }
-
+    
     void AdvanceQueue()
     {
         currentType = nextType;
