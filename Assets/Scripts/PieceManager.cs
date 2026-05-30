@@ -271,7 +271,7 @@ public class PieceManager : MonoBehaviour
     void StoreCurrentInHold()
     {
         holdType = currentType;
-        holdShape = currentShape;
+        holdShape = (Vector2Int[])currentShape.Clone();
         UpdateHoldVisual();
     }
 
@@ -282,7 +282,7 @@ public class PieceManager : MonoBehaviour
         currentType = holdType.Value;
         currentShape = holdShape;
         holdType = tempType;
-        holdShape = tempShape;
+        holdShape = (Vector2Int[])tempShape.Clone();
         UpdateHoldVisual();
     }
 
