@@ -165,13 +165,15 @@ public class PieceManager : MonoBehaviour
 
         piecesPlaced++;
         int lines = gridManager.CheckAndClearLines();
+        int columns = gridManager.CheckAndClearColumns();
+        int totalCleared = lines + columns;
         score += lines switch
         {
             1 => 100,
             2 => 300,
             3 => 500,
             4 => 800,
-            _ => 0
+            _ => totalCleared * 200 // fallback para valores maiores que 4
         };
         UpdateUI();
         AdvanceQueue();
