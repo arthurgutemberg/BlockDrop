@@ -14,7 +14,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     private GameObject ghostPrefab;
     private Vector3 startPosition;
     private Camera cam;
-    [HideInInspector] public GameObject placeParticlesPrefab; // será definido pelo PieceManager
+    [HideInInspector] public GameObject placeParticlesPrefab;
 
     void Awake()
     {
@@ -34,30 +34,30 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         foreach (var offset in shape)
         {
             GameObject block = Instantiate(gridManager.blockPrefab, transform);
+            // Posição local sem centralização (usando offsets originais)
             block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
-            block.transform.localScale = Vector3.one * scale;   // 🔹 escala do bloco
+            block.transform.localScale = Vector3.one * scale;
             block.GetComponent<SpriteRenderer>().color = GetColor(type);
             Destroy(block.GetComponent<BoxCollider2D>());
             blocks.Add(block.transform);
         }
         Physics2D.SyncTransforms();
 
-        // Adiciona um BoxCollider2D que cubra todos os blocos
-        // Adiciona um BoxCollider2D que cubra todos os blocos
+        // Colisor ajustado com corrotina (mantido)
         BoxCollider2D col = gameObject.AddComponent<BoxCollider2D>();
-        // Aguarda um frame para garantir que as posições dos sprites estejam atualizadas
         StartCoroutine(UpdateColliderNextFrame(col));
     }
 
+    // Cor de cada tipo (mantida)
     Color GetColor(PieceType type)
     {
         return type switch
         {
             PieceType.I => Color.cyan,
             PieceType.O => Color.yellow,
-            PieceType.T => new Color(0.6f, 0.2f, 0.8f), // Roxo
+            PieceType.T => new Color(0.6f, 0.2f, 0.8f),
             PieceType.L => Color.blue,
-            PieceType.J => new Color(1f, 0.5f, 0f), // Laranja
+            PieceType.J => new Color(1f, 0.5f, 0f),
             PieceType.S => Color.green,
             PieceType.Z => Color.red,
             PieceType.Dot    => new Color(1f, 0.08f, 0.58f), // Rosa Choque / Deep Pink
@@ -67,6 +67,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         };
     }
 
+    // Métodos de arrasto (inalterados)
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (isPlaced) return;
@@ -90,7 +91,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         if (TryPlace())
         {
             ghostPrefab?.SetActive(false);
-            FindAnyObjectByType<PieceManager>()?.OnPiecePlaced();  // será descomentado na Fase 4
+            FindAnyObjectByType<PieceManager>()?.OnPiecePlaced();
         }
         else
         {
@@ -99,8 +100,6 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         }
     }
 
-
-
     void UpdateGhostPosition()
     {
         if (ghostPrefab == null) return;
@@ -108,9 +107,10 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         ghostPrefab.transform.position = snapPos;
     }
 
+    // SNAP: usa o primeiro bloco (canto mínimo original) como referência
     Vector3 GetSnapPosition()
     {
-        Vector3 pivotWorld = transform.TransformPoint(Vector3.zero);
+        Vector3 pivotWorld = transform.TransformPoint(Vector3.zero); // (0,0) local é o canto mínimo
         Vector3 gridOrigin = gridManager.transform.position + new Vector3(gridManager.GridStartX, gridManager.GridStartY, 0);
         int col = Mathf.RoundToInt(pivotWorld.x - gridOrigin.x);
         int row = Mathf.RoundToInt(pivotWorld.y - gridOrigin.y);
@@ -123,7 +123,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         int gridX = Mathf.RoundToInt(snapPos.x - (gridManager.transform.position.x + gridManager.GridStartX));
         int gridY = Mathf.RoundToInt(snapPos.y - (gridManager.transform.position.y + gridManager.GridStartY));
 
-        // 1. Verificar se todos os blocos cabem (dentro do grid e célula vazia)
+        // Verifica células usando shapeOffsets originais
         for (int i = 0; i < shapeOffsets.Length; i++)
         {
             Vector2Int offset = shapeOffsets[i];
@@ -137,11 +137,10 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
                 return false;
         }
 
-        // 2. Posicionar a peça e marcá-la como colocada
         transform.position = snapPos;
         isPlaced = true;
 
-        // 3. Registrar ocupação no GridManager (agora com o GameObject do bloco)
+        // Registra ocupação
         for (int i = 0; i < shapeOffsets.Length; i++)
         {
             Vector2Int offset = shapeOffsets[i];
@@ -150,20 +149,17 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
             gridManager.SetCellOccupied(x, y, transform, blocks[i].gameObject);
         }
 
+        // Partículas com 50% de chance por bloco
         if (placeParticlesPrefab != null)
         {
             foreach (Transform block in blocks)
             {
-                if (Random.value < 0.5f)   // 50% de chance em cada bloco
-                {
+                if (Random.value < 0.5f)
                     Instantiate(placeParticlesPrefab, block.position, Quaternion.identity);
-                }
             }
         }
 
-        // 4. Remover o colisor para não interferir em cliques futuros
         Destroy(GetComponent<BoxCollider2D>());
-
         return true;
     }
 
@@ -179,7 +175,7 @@ public class DraggablePiece : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     System.Collections.IEnumerator UpdateColliderNextFrame(BoxCollider2D col)
     {
-        yield return null; // espera um frame para os Sprites estarem posicionados
+        yield return null;
         Bounds bounds = new Bounds(transform.position, Vector3.zero);
         foreach (Transform block in blocks)
         {

@@ -101,8 +101,11 @@ public class PieceManager : MonoBehaviour
 
         // 3. Cria o objeto da nova peça
         GameObject pieceObj = new GameObject("CurrentPiece");
-        pieceObj.transform.position = currentPieceArea.position;  // escala visual
-
+        // Calcula centroide da forma para centralizar na área
+        Vector2 centroid = Vector2.zero;
+        foreach (var offset in currentShape) centroid += offset;
+        centroid /= currentShape.Length;
+        pieceObj.transform.position = currentPieceArea.position - (Vector3)centroid;
         // 4. Adiciona o script DraggablePiece e inicializa
         DraggablePiece dp = pieceObj.AddComponent<DraggablePiece>();
         currentGhost = CreateGhost(currentShape);
@@ -238,10 +241,14 @@ public class PieceManager : MonoBehaviour
         container.transform.localPosition = Vector3.zero;
         container.transform.localScale = Vector3.one * previewScale;
 
+        Vector2 centroid = Vector2.zero;
+        foreach (var offset in shape) centroid += offset;
+        centroid /= shape.Length;
+
         foreach (var offset in shape)
         {
             GameObject block = Instantiate(blockPrefab, container.transform);
-            block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
+            block.transform.localPosition = new Vector3(offset.x - centroid.x, offset.y - centroid.y, 0);
             block.GetComponent<SpriteRenderer>().color = GetColor(type);
             Destroy(block.GetComponent<BoxCollider2D>());
         }
@@ -253,7 +260,7 @@ public class PieceManager : MonoBehaviour
         foreach (var offset in shape)
         {
             GameObject block = Instantiate(blockPrefab, ghost.transform);
-            block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
+            block.transform.localPosition = new Vector3(offset.x, offset.y, 0);  // offsets originais
             block.transform.localScale = Vector3.one * ghostScale;
             SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
             sr.color = new Color(1, 1, 1, 0.3f);
@@ -326,12 +333,17 @@ public class PieceManager : MonoBehaviour
             GameObject container = new GameObject("HoldPiece");
             container.transform.SetParent(holdPiecePos, false);
             container.transform.localPosition = Vector3.zero;
-            container.transform.localScale = Vector3.one * holdScale; // reduz 50%
+            container.transform.localScale = Vector3.one * holdScale;
+
+            // Calcula centroide da peça no hold
+            Vector2 centroid = Vector2.zero;
+            foreach (var offset in holdShape) centroid += offset;
+            centroid /= holdShape.Length;
 
             foreach (var offset in holdShape)
             {
                 GameObject block = Instantiate(blockPrefab, container.transform);
-                block.transform.localPosition = new Vector3(offset.x, offset.y, 0);
+                block.transform.localPosition = new Vector3(offset.x - centroid.x, offset.y - centroid.y, 0);
                 block.GetComponent<SpriteRenderer>().color = GetColor(holdType.Value);
             }
         }
